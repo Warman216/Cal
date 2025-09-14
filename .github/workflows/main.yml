@@ -1,4 +1,4 @@
-name: Build APK
+:Build APK
 
 on:
   push:
@@ -63,18 +63,3 @@ jobs:
       - name: Set up Buildozer configuration
         run: |
           cp buildozer.yml $GITHUB_WORKSPACE/
-
-      - name: Build APK with Buildozer (verbose)
-        run: |
-          cd $GITHUB_WORKSPACE
-          buildozer -v android debug
-
-      - name: List APK output
-        run: |
-          ls -la bin/
-
-      - name: Upload APK as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: apk-file
-          path: bin/*.apk
