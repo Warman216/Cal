@@ -47,6 +47,7 @@ jobs:
           python3 --version
           pip --version
           buildozer --version
+          echo "JAVA_HOME=$JAVA_HOME"
 
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
@@ -61,14 +62,13 @@ jobs:
           key: buildozer-project-${{ hashFiles('buildozer.spec') }}
 
       - name: Build APK with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        id: buildozer
-        with:
-          command: buildozer android debug
-          buildozer_version: stable
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME }}
+        run: |
+          buildozer android debug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: package
-          path: ${{ steps.buildozer.outputs.filename }}
+          path: ${{ steps.buildozer.outputs.filename || 'bin/*.apk' }}
