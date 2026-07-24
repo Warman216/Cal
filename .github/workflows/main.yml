@@ -50,47 +50,25 @@ jobs:
       - name: Set up Android SDK and NDK
         run: |
           wget https://dl.google.com/android/repository/android-ndk-r19b-linux-x86_64.zip
-          unzip android-ndk-r19b-linux-x86_64.zip
+          unzip -q android-ndk-r19b-linux-x86_64.zip
+          
           wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-          unzip commandlinetools-linux-8512546_latest.zip
-          mkdir -p $HOME/.android
-          mv cmdline-tools $HOME/.android/
-          yes | $HOME/.android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/.android/cmdline-tools --install "platforms;android-29" "build-tools;29.0.3" "tools"
-          ls -l $HOME/.android/cmdline-tools
+          unzip -q commandlinetools-linux-8512546_latest.zip
+          
+          mkdir -p $HOME/.android/cmdline-tools
+          mv cmdline-tools/* $HOME/.android/cmdline-tools/ || true
+          
+          export ANDROID_SDK_ROOT=$HOME/.android
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/bin:$PATH
+          
+          yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platforms;android-29" "build-tools;29.0.3" "tools"
 
       - name: Set up environment variables
         run: |
           echo "ANDROID_NDK_HOME=$HOME/android-ndk-r19b" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$HOME/.android" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$HOME/.android" >> $GITHUB_ENV
 
       - name: Build APK with Buildozer
         run: |
-          buildozer android debug          python3 -m pip install --upgrade pip
-          pip install cython buildozer
-
-      - name: Debug environment
-        run: |
-          echo $PATH
-          which python3
-          python3 --version
-          which pip
-          pip --version
-          which buildozer
-          buildozer --version || true
-
-      - name: Set up Android SDK and NDK
-        run: |
-          wget https://dl.google.com/android/repository/android-ndk-r19b-linux-x86_64.zip
-          unzip android-ndk-r19b-linux-x86_64.zip
-          export ANDROID_NDK_HOME=$PWD/android-ndk-r19b
-          export PATH=$ANDROID_NDK_HOME:$PATH
-          wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-          unzip commandlinetools-linux-8512546_latest.zip
-          mkdir -p $HOME/.android
-          mv cmdline-tools $HOME/.android/
-          yes | $HOME/.android/cmdline-tools/bin/sdkmanager --sdk_root=$HOME/.android/cmdline-tools --install "platforms;android-29" "build-tools;29.0.3" "tools"
-          ls -l $HOME/.android/cmdline-tools
-
-      - name: Set up Buildozer configuration
-        run: |
-          cp buildozer.yml $GITHUB_WORKSPACE/
+          buildozer android debug
